@@ -28,5 +28,6 @@ public class TaskTimer {
                             new SendMessage(task.getChatId(), "Вы просили напомнить: " + task.getText()));
                     taskRepository.delete(task);
                 });
+
     }
 }

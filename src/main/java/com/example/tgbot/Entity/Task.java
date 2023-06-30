@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Getter
 @Setter
@@ -23,4 +24,8 @@ public class Task {
     private LocalDateTime dateTime;
     private String text;
 
+    @Override
+    public String toString() {
+        return "[" + dateTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) + "] " + text;
+    }
 }

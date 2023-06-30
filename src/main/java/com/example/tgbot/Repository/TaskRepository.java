@@ -8,4 +8,7 @@ import java.util.List;
 
 public interface TaskRepository extends JpaRepository<Task, Long> {
     List<Task> findAllByDateTime (LocalDateTime dateTime);
+    List<Task> findAllByChatId (Long chatId);
+    void deleteByChatIdAndId (Long chatId, Long taskId);
+
 }
