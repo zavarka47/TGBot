@@ -26,7 +26,7 @@ public class StartHandler implements TelegramHandler{
     public void handleUpdate(Update update) {
 
         InlineKeyboardButton button1 = new InlineKeyboardButton("Создать задачу").callbackData("1");
-        InlineKeyboardButton button2 = new InlineKeyboardButton("не нажимать").callbackData("2");
+        InlineKeyboardButton button2 = new InlineKeyboardButton("НЕ НАЖИМАТЬ").callbackData("2");
         InlineKeyboardButton button3 = new InlineKeyboardButton("Показать все задачи").callbackData("3");
         InlineKeyboardButton button4 = new InlineKeyboardButton("Удалить задачу").callbackData("4");
 
