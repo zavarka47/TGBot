@@ -1,13 +1,15 @@
 package com.example.tgbot.handlers;
 
 import com.example.tgbot.Entity.Task;
-import com.example.tgbot.Loggers;
+import com.example.tgbot.SendMessages;
 import com.example.tgbot.Service.TaskService;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -20,10 +22,14 @@ import java.util.stream.Collectors;
 public class GetHandler implements TelegramHandler{
     private final TelegramBot telegramBot;
     private final TaskService taskService;
+    private final SendMessages sendMessages;
+    private final Logger logger = LoggerFactory.getLogger(GetHandler.class);
 
-    public GetHandler(TelegramBot telegramBot, TaskService taskService) {
+    public GetHandler(TelegramBot telegramBot, TaskService taskService,
+                      SendMessages sendMessages) {
         this.telegramBot = telegramBot;
         this.taskService = taskService;
+        this.sendMessages = sendMessages;
     }
     @Override
     public boolean appliesTo(Update update) {
@@ -36,9 +42,7 @@ public class GetHandler implements TelegramHandler{
         List<Task> tasks = taskService.getAllByChatId(chatId);
 
         if (tasks.isEmpty()) {
-            sendMessage(chatId, """
-                                        Список задач пуст
-                                        """);
+            sendMessages.sendSimpleMessage(chatId, "Список задач пуст");
         } else {
             Map<LocalDate, List<Task>> dates = tasks.stream()
                     .collect(Collectors.groupingBy(task -> task.getDateTime().toLocalDate()))
@@ -58,14 +62,7 @@ public class GetHandler implements TelegramHandler{
             answer = answer.replaceAll("\\.", "\\\\.")
                     .replaceAll("\\:", "\\\\:")
                     .replaceAll("\\-", "\\\\-");
-            sendMessage(chatId, answer);
-        }
-    }
-    public void sendMessage(Long chatId, String text) {
-        SendResponse sendResponse = telegramBot.execute(
-                new SendMessage(chatId, text).parseMode(ParseMode.MarkdownV2));
-        if (!sendResponse.isOk()){
-            Loggers.getLogger(CreateHandler.class).error("Error during sending message: {}", sendResponse.description());
+            sendMessages.sendMessageWithEmoji(chatId, answer);
         }
     }
 }

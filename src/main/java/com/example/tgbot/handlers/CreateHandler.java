@@ -1,13 +1,15 @@
 package com.example.tgbot.handlers;
 
 import com.example.tgbot.Entity.Task;
-import com.example.tgbot.Loggers;
+import com.example.tgbot.SendMessages;
 import com.example.tgbot.Service.TaskService;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
@@ -23,13 +25,17 @@ import java.util.regex.Pattern;
 public class CreateHandler implements TelegramHandler {
     private final TelegramBot telegramBot;
     private final TaskService taskService;
+    private final SendMessages sendMessages;
+    private final Logger logger = LoggerFactory.getLogger(CreateHandler.class);
     private final Pattern patternTime = Pattern.compile(
             "(\\d{1,2}\\.\\d{1,2}\\.\\d{4} \\d{1,2}:\\d{1,2})\\s+([А-я\\s\\d\\p{Punct}]+)"
     );
 
-    public CreateHandler(TelegramBot telegramBot, TaskService taskService) {
+    public CreateHandler(TelegramBot telegramBot, TaskService taskService,
+                         SendMessages sendMessages) {
         this.telegramBot = telegramBot;
         this.taskService = taskService;
+        this.sendMessages = sendMessages;
     }
 
     @Override
@@ -47,7 +53,7 @@ public class CreateHandler implements TelegramHandler {
     public void handleUpdate(Update update) {
         if ( Objects.nonNull(update.callbackQuery())){
             Long chatId = update.callbackQuery().from().id();
-            sendMessage(chatId, """
+            sendMessages.sendMessageWithEmoji(chatId, """
                                     Введите задачу в формате:
                                     _01\\.01\\.2001 00\\:00 Поздравить друзей с новым годом\\!_
                                     """);
@@ -60,12 +66,12 @@ public class CreateHandler implements TelegramHandler {
                 LocalDateTime dateTime = parse(matcher.group(1));
 
                 if (Objects.isNull(dateTime)) {
-                    sendMessage(chatId, """
+                    sendMessages.sendMessageWithEmoji(chatId, """
                          Чё\\?""
                          ||Дата и\\/или время указаны в неверном формате||
                         """);
                 } else if (dateTime.isBefore(LocalDateTime.now())) {
-                    sendMessage(chatId, """
+                    sendMessages.sendSimpleMessage(chatId, """
                          Если у тебя нет машины времени, то так не получится
                         """);
                 } else {
@@ -74,9 +80,7 @@ public class CreateHandler implements TelegramHandler {
                     task.setDateTime(dateTime.truncatedTo(ChronoUnit.MINUTES));
                     task.setText(matcher.group(2));
                     taskService.save(task);
-                    sendMessage(chatId, """
-                        Задача сохранена✍️
-                        """);
+                    sendMessages.sendMessageWithEmoji(chatId, "Задача сохранена✍️");
                 }
             }
         }
@@ -89,17 +93,9 @@ public class CreateHandler implements TelegramHandler {
         try {
             return LocalDateTime.parse(dateTime, DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
         } catch (DateTimeException d) {
-            Loggers.getLogger(CreateHandler.class).error("Ошибка при записи даты из задачи: {}", d.getMessage());
+            logger.error("Ошибка при записи даты из задачи: {}", d.getMessage());
             return null;
 
-        }
-    }
-
-    public void sendMessage(Long chatId, String text) {
-        SendResponse sendResponse = telegramBot.execute(
-                new SendMessage(chatId, text).parseMode(ParseMode.MarkdownV2));
-        if (!sendResponse.isOk()){
-            Loggers.getLogger(CreateHandler.class).error("Error during sending message: {}", sendResponse.description());
         }
     }
 }

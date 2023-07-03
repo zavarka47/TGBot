@@ -1,6 +1,7 @@
 package com.example.tgbot.Listener;
 
 
+import com.example.tgbot.SendMessages;
 import com.example.tgbot.handlers.TelegramHandler;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
@@ -22,11 +23,14 @@ import java.util.Objects;
 public class TelegramBotUpdateListener implements UpdatesListener {
     private final TelegramBot telegramBot;
     private final List<TelegramHandler> handlers;
+    private final SendMessages sendMessages;
     private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdateListener.class);
 
-    public TelegramBotUpdateListener(TelegramBot telegramBot, List<TelegramHandler> handlers) {
+    public TelegramBotUpdateListener(TelegramBot telegramBot, List<TelegramHandler> handlers,
+                                     SendMessages sendMessages) {
         this.telegramBot = telegramBot;
         this.handlers = handlers;
+        this.sendMessages = sendMessages;
 
     }
 
@@ -56,7 +60,7 @@ public class TelegramBotUpdateListener implements UpdatesListener {
 
                     }
                 } if (!messageHandle){
-                    sendMessage(chatId, """
+                    sendMessages.sendMessageWithEmoji(chatId, """
                          Чё\\?""
                          ||Такой команды я не знаю ☹️
                         """);
@@ -66,13 +70,5 @@ public class TelegramBotUpdateListener implements UpdatesListener {
             logger.error(e.getMessage(), e);
         }
         return UpdatesListener.CONFIRMED_UPDATES_ALL;
-    }
-
-    public void sendMessage (Long chatId, String text){
-        SendMessage sendMessage = new SendMessage(chatId, text).parseMode(ParseMode.MarkdownV2);
-        SendResponse sendResponse = telegramBot.execute(sendMessage);
-        if (!sendResponse.isOk()){
-            logger.error("Error during sending message: {}", sendResponse.description());
-        }
     }
 }

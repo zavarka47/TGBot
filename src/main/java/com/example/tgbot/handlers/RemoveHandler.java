@@ -1,7 +1,7 @@
 package com.example.tgbot.handlers;
 
 import com.example.tgbot.Entity.Task;
-import com.example.tgbot.Loggers;
+import com.example.tgbot.SendMessages;
 import com.example.tgbot.Service.TaskService;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Update;
@@ -10,6 +10,8 @@ import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -22,11 +24,15 @@ import java.util.stream.Collectors;
 public class RemoveHandler implements TelegramHandler{
     private final TelegramBot telegramBot;
     private final TaskService taskService;
+    private final SendMessages sendMessages;
+    private final Logger logger = LoggerFactory.getLogger(RemoveHandler.class);
     private final Pattern patternIds = Pattern.compile("(\\d+)(!!)(\\d+)");
 
-    public RemoveHandler(TelegramBot telegramBot, TaskService taskService) {
+    public RemoveHandler(TelegramBot telegramBot, TaskService taskService,
+                         SendMessages sendMessages) {
         this.telegramBot = telegramBot;
         this.taskService = taskService;
+        this.sendMessages = sendMessages;
     }
 
     @Override
@@ -42,7 +48,7 @@ public class RemoveHandler implements TelegramHandler{
 
         if (matcher.find()){
             taskService.deleteByIds(Long.valueOf(matcher.group(1)), Long.valueOf(matcher.group(3)));
-            sendMessage(chatId, "Задача удалена", new InlineKeyboardMarkup());
+            sendMessages.sendSimpleMessage(chatId, "Задача удалена");
         }
 
 
@@ -52,7 +58,7 @@ public class RemoveHandler implements TelegramHandler{
                     sorted((o1, o2) -> o1.getDateTime().isBefore(o2.getDateTime()) ? 1 : -1)
                     .collect(Collectors.toList());
             if (tasks1.isEmpty()) {
-                sendMessage(chatId, "На сегодня задач нет", new InlineKeyboardMarkup());
+                sendMessages.sendSimpleMessage(chatId, "На сегодня задач нет");
             } else {
                 InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
                 for (Task task : tasks1) {
@@ -63,7 +69,8 @@ public class RemoveHandler implements TelegramHandler{
                                                     task.getId()));
                     keyboardMarkup.addRow(button);
                 }
-                sendMessage(chatId, "Выберите задачу, которую хотите удалить", keyboardMarkup);
+                sendMessages.sendMessageWithKeyboard(chatId,
+                        "Выберите задачу, которую хотите удалить", keyboardMarkup);
 
             }
         }
@@ -74,7 +81,7 @@ public class RemoveHandler implements TelegramHandler{
             SendResponse sendResponse = telegramBot.execute(
                     new SendMessage(chatId, text).parseMode(ParseMode.MarkdownV2).replyMarkup(keyboard));
             if (!sendResponse.isOk()){
-                Loggers.getLogger(CreateHandler.class).error("Error during sending message: {}", sendResponse.description());
+              logger.error("Error during sending message: {}", sendResponse.description());
             }
         }
 }

@@ -1,5 +1,6 @@
 package com.example.tgbot.handlers;
 
+import com.example.tgbot.SendMessages;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
@@ -11,10 +12,10 @@ import java.util.Objects;
 
 @Component
 public class StartHandler implements TelegramHandler{
-    private final TelegramBot telegramBot;
+    private final SendMessages sendMessages;
 
-    public StartHandler(TelegramBot telegramBot) {
-        this.telegramBot = telegramBot;
+    public StartHandler(SendMessages sendMessages) {
+        this.sendMessages = sendMessages;
     }
 
     @Override
@@ -34,11 +35,10 @@ public class StartHandler implements TelegramHandler{
 
         Long chatId = update.message().chat().id();
 
-        telegramBot.execute(new SendMessage(chatId,
-                    """
-                            Привет !👋
-                            Я помогу тебе составить расписание!
-                            """).replyMarkup(keyboard));
+        sendMessages.sendMessageWithKeyboard(chatId,"""
+                            Привет \\!👋
+                            Я помогу тебе составить расписание\\!
+                            """, keyboard);
 
     }
 
