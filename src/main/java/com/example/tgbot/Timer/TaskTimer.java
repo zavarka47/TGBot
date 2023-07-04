@@ -38,9 +38,9 @@ public class TaskTimer {
                 .stream()
                 .collect(Collectors.groupingBy(task -> task.getChatId()));
 
-        for (Long chatId:tasksByChat.keySet()) {
-            if (tasksByChat.get(chatId).isEmpty()){
-                sendMessages.sendSimpleMessage(chatId, """
+        for (Map.Entry<Long, List<Task>> map : tasksByChat.entrySet()){
+            if (map.getValue().isEmpty()){
+                sendMessages.sendSimpleMessage(map.getKey(), """
                         Доброе утро!
                         На сегодня задач нет
                         """);
@@ -48,10 +48,10 @@ public class TaskTimer {
                 String tasks = """
                         Доброе утро! Сегодня в программе
                         """;
-                for (Task task:tasksByChat.get(chatId)) {
+                for (Task task:map.getValue()) {
                     tasks = tasks + task.getDateTime().toLocalTime() + " " + task.getText() + "\n";
                 }
-                sendMessages.sendSimpleMessage(chatId, tasks);
+                sendMessages.sendSimpleMessage(map.getKey(), tasks);
 
             }
         }
