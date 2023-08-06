@@ -13,7 +13,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     List<Task> findAllByDateTime (LocalDateTime dateTime);
 
 
-    @Query(value = "SELECT * FROM task WHERE CAST(task.date_time AS DATE) AS data_task = current_date", nativeQuery = true)
+    @Query(value = "select * from task where date(date_time) = CURRENT_DATE;", nativeQuery = true)
     List<Task> findAllForToday ();
     List<Task> findAllByChatId (Long chatId);
     void deleteByChatIdAndId (Long chatId, Long taskId);

@@ -31,7 +31,7 @@ public class TaskTimer {
         this.taskService = taskService;
     }
 
-    @Scheduled (cron = "*/6 * 23 * * *")
+    @Scheduled (cron = "*/60 30 7 * * *")
     private void dailyTask(){
         Map<Long, List<Task>> tasksByChat = taskRepository
                 .findAllForToday()
@@ -46,7 +46,7 @@ public class TaskTimer {
                         """);
             } else {
                 String tasks = """
-                        Доброе утро! Сегодня в программе
+                        Доброе утро! Сегодня в программе:
                         """;
                 for (Task task:map.getValue()) {
                     tasks = tasks + task.getDateTime().toLocalTime() + " " + task.getText() + "\n";
