@@ -56,7 +56,8 @@ public class TelegramBotUpdateListener implements UpdatesListener {
                         messageHandle = true;
 
                     }
-                } if (!messageHandle){
+                }
+                if (!messageHandle){
                     sendMessages.sendMessageWithEmoji(chatId, """
                          Чё\\?""
                          ||Такой команды я не знаю ☹️

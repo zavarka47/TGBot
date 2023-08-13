@@ -84,9 +84,7 @@ public class CreateHandler implements TelegramHandler {
                 }
             }
         }
-
     }
-
 
     @Nullable
     private LocalDateTime parse(String dateTime) {
@@ -95,7 +93,6 @@ public class CreateHandler implements TelegramHandler {
         } catch (DateTimeException d) {
             logger.error("Ошибка при записи даты из задачи: {}", d.getMessage());
             return null;
-
         }
     }
 }
