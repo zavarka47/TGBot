@@ -1,7 +1,6 @@
-package com.example.tgbot.handlerStart;
+package com.example.tgbot.handlers;
 
 import com.example.tgbot.SendMessages;
-import com.example.tgbot.handlers.StartHandler;
 import com.pengrad.telegrambot.BotUtils;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Update;
