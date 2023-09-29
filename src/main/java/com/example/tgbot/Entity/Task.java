@@ -3,17 +3,19 @@ package com.example.tgbot.Entity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @Entity
 @Table (name = "task")
-public class Task {
+public class Task implements Comparable<Task> {
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
     @Column (name = "task_id")
@@ -28,4 +30,17 @@ public class Task {
     public String toString() {
         return "[" + dateTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) + "] " + text;
     }
+
+    @Override
+    public int compareTo(@NotNull Task o) {
+        if (this.getDateTime().isAfter(o.getDateTime())){
+            return 1;
+        } else if (this.getDateTime().isBefore(o.getDateTime())){
+            return -1;
+        } else {
+            return 0;
+        }
+    }
+
+
 }
